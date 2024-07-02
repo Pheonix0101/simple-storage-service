@@ -1,0 +1,180 @@
+openapi: 3.0.0
+info:
+  title: simple storage service API
+  description: Project API details found on this page.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:9000/
+    description: Local server for simple storage service(S3).
+
+paths:
+  /getfiles/{bucketname}:
+    get:
+      summary: Get all files from bucket
+      parameters:
+        - name: bucketname
+          in: path
+          required: true
+          description: The name of the bucket to retrieve files from.
+          schema:
+            type: string
+            example: "bucket1"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["file1.txt", "file2.txt"]
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+
+  /upload/{bucketname}:
+    post:
+      summary: Upload a file to the bucket
+      parameters:
+        - name: bucketname
+          in: path
+          required: true
+          description: The name of the bucket to upload the file to.
+          schema:
+            type: string
+            example: "bucket1"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: File uploaded successfully
+        "400":
+          description: Bad Request
+        "404":
+          description: Bucket not found
+
+  /files/{bucketname}/{filename}:
+    delete:
+      summary: Delete a file from the bucket
+      parameters:
+        - name: bucketname
+          in: path
+          required: true
+          description: The name of the bucket.
+          schema:
+            type: string
+            example: "bucket2"
+        - name: filename
+          in: path
+          required: true
+          description: The name of the file to delete.
+          schema:
+            type: string
+            example: "file1.txt"
+      responses:
+        "200":
+          description: File deleted successfully
+        "400":
+          description: Bad Request
+        "404":
+          description: file not deleted
+
+  /files:
+    delete:
+      summary: Delete multiple files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bucketname:
+                  type: string
+                  description: The name of the bucket from which to delete files.
+                  example: "bucket1"
+                filenames:
+                  type: array
+                  items:
+                    type: string
+                  description: List of filenames to delete.
+                  example: ["file1.txt", "file2.txt"]
+      responses:
+        "200":
+          description: Files deleted successfully
+        "400":
+          description: Bad Request
+        "404":
+          description: Bucket or files not found
+
+
+  /buckets:
+      get:
+        summary: List all buckets
+        responses:
+          '200':
+            description: A list of buckets
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      bucketname:
+                        type: string
+                        example: "bucket1"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-07-02T12:34:56Z"
+          '400':
+            description: Bad Request
+          '404':
+            description: No buckets found
+
+
+  /file/{bucketname}/{filename}:
+      get:
+        summary: Download a file from the bucket
+        parameters:
+        - name: bucketname
+          in: path
+          required: true
+          description: The name of the bucket to retrieve files from.
+          schema:
+            type: string
+            example: "bucket1"
+        - name: filename
+          in: path
+          required: true
+          description: The name of the bucket to retrieve files from.
+          schema:
+            type: string
+            example: "text1.pdf"
+        responses: 
+          '200':
+            description: File downloaded successfully
+            content:
+              application/octet-stream:
+                schema:
+                  type: string
+                  format: binary
+          '400':
+            description: Bad Request
+          '404':
+            description: Bucket or file not found
+
+
+
