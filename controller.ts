@@ -3,28 +3,16 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Define storage configuration for multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const bucket = req.params.bucketname as string;
-    const uploadDir = path.join("storage", bucket);
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
+import {
+  uploadfiles_helper,
+  readDirectory_helper,
+  removeFileFromBucket_helper,
+  removeMultipleFiles_helper,
+  getContentType,
+  printBucketName_hepler,
+} from "./fileHandler";
 
-// Function to create multer middleware with the configured storage
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5000 * 1024 * 1024 }, // limit file size to 5GB
-}).any(); // Accept any type of file
 
-// Route handler for uploading files
 export const uploadFiles: RequestHandler = (req: Request, res: Response) => {
   const bucket = req.params.bucketname as string;
   if (!bucket) {
@@ -32,39 +20,39 @@ export const uploadFiles: RequestHandler = (req: Request, res: Response) => {
     return;
   }
 
-  upload(req, res, (err) => {
+  uploadfiles_helper(req, res, (err) => {
     if (err instanceof multer.MulterError || err) {
-      console.error("Error uploading file:", err);
-      res.status(500).send("An error occurred during the file upload.");
+      console.error("Error uploading file to the bucket:", err);
+      res.status(500).send("An error occurred during the file uploading.");
       return;
     }
     res.send("Files uploaded successfully.");
   });
 };
 
-// Other route handlers for file operations (getAllFiles, deleteFile, etc.)
-// Implement as needed, using similar RequestHandler definitions
 
-export const getAllFiles: RequestHandler = (req: Request, res: Response) => {
-  // Implement logic to retrieve all files in a bucket
+export const getAllFiles = (req: Request, res: Response): void => {
   const bucketName = req.params.bucketname as string;
-  const uploadDir = `storage/${bucketName}`;
-  fs.readdir(uploadDir, (err, files) => {
+  const uploadDir = path.join("storage", bucketName);
+
+  readDirectory_helper(uploadDir, (err, files) => {
     if (err) {
       console.error("Error reading directory:", err);
       res.status(500).send("An error occurred while retrieving files.");
-      return;
+    } else {
+      res.json(files);
     }
-    res.json(files);
   });
 };
 
 export const deleteFile: RequestHandler = (req: Request, res: Response) => {
-  // Implement logic to delete a file from a bucket
+
   const bucket = req.params.bucketname as string;
   const fileName = req.params.filename as string;
   const filePath = path.join(`storage/${bucket}`, fileName);
-  fs.unlink(filePath, (err) => {
+
+
+  removeFileFromBucket_helper(filePath, (err) => {
     if (err) {
       console.error("Error deleting file:", err);
       res.status(500).send("An error occurred while deleting the file.");
@@ -75,8 +63,11 @@ export const deleteFile: RequestHandler = (req: Request, res: Response) => {
   });
 };
 
-export const deleteMultipleFiles: RequestHandler = (req: Request, res: Response) => {
-  // Implement logic to delete multiple files from a bucket
+export const deleteMultipleFiles: RequestHandler = (
+  req: Request,
+  res: Response
+) => {
+
   const bucket = req.body.bucketname as string;
   const filenames = req.body.filenames as string[];
   if (!Array.isArray(filenames)) {
@@ -86,23 +77,15 @@ export const deleteMultipleFiles: RequestHandler = (req: Request, res: Response)
 
   let errors: string[] = [];
 
-  filenames.forEach((filename) => {
-    const filePath = path.join(`storage/${bucket}`, filename);
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", filename, err);
-        errors.push(filename);
-      }
-    });
-  });
+  removeMultipleFiles_helper(filenames, bucket, errors);
+
   if (errors.length > 0) {
     res.status(500).json({
-      message: "Some files could not be deleted",
+      message: "Some files could not be deleted.",
       errors: errors,
     });
     return;
   }
-
   res.send("Files deleted successfully.");
 };
 
@@ -130,36 +113,17 @@ export const downloadFile: RequestHandler = (req: Request, res: Response) => {
   fileStream.pipe(res);
 };
 
-function getContentType(fileName: string): string {
-  const ext = path.extname(fileName).toLowerCase();
-  switch (ext) {
-    case ".pdf":
-      return "application/pdf";
-    case ".jpg":
-      return "image/jpg";
-    case ".jpeg":
-      return "image/jpeg";
-    case ".png":
-      return "image/png";
-    case ".svg":
-      return "image/svg";
-    default:
-      return "application/octet-stream"; // fallback to binary data if type is unknown
-  }
-};
 
 export const listBucket: RequestHandler = (req: Request, res: Response) => {
-  // Implement logic to list all buckets
-  const uploadsDir = "storage";
-  fs.readdir(uploadsDir, { withFileTypes: true }, (err, files) => {
+
+  const currDir = "storage";
+
+  printBucketName_hepler(currDir, (err, dir) => {
     if (err) {
-      console.error("Error reading directory:", err);
       res.status(500).send("An error occurred while retrieving folders.");
-      return;
+    } else {
+      res.json(dir);
     }
-    const folders = files
-      .filter((file) => file.isDirectory())
-      .map((file) => file.name);
-    res.json(folders);
   });
 };
+

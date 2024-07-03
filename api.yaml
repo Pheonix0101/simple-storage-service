@@ -130,15 +130,12 @@ paths:
                 schema:
                   type: array
                   items:
-                    type: object
+                    type: string
                     properties:
                       bucketname:
                         type: string
                         example: "bucket1"
-                      createdAt:
-                        type: string
-                        format: date-time
-                        example: "2024-07-02T12:34:56Z"
+                      
           '400':
             description: Bad Request
           '404':
