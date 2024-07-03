@@ -12,7 +12,6 @@ import {
   printBucketName_hepler,
 } from "./fileHandler";
 
-
 export const uploadFiles: RequestHandler = (req: Request, res: Response) => {
   const bucket = req.params.bucketname as string;
   if (!bucket) {
@@ -30,7 +29,6 @@ export const uploadFiles: RequestHandler = (req: Request, res: Response) => {
   });
 };
 
-
 export const getAllFiles = (req: Request, res: Response): void => {
   const bucketName = req.params.bucketname as string;
   const uploadDir = path.join("storage", bucketName);
@@ -46,11 +44,9 @@ export const getAllFiles = (req: Request, res: Response): void => {
 };
 
 export const deleteFile: RequestHandler = (req: Request, res: Response) => {
-
   const bucket = req.params.bucketname as string;
   const fileName = req.params.filename as string;
   const filePath = path.join(`storage/${bucket}`, fileName);
-
 
   removeFileFromBucket_helper(filePath, (err) => {
     if (err) {
@@ -67,7 +63,6 @@ export const deleteMultipleFiles: RequestHandler = (
   req: Request,
   res: Response
 ) => {
-
   const bucket = req.body.bucketname as string;
   const filenames = req.body.filenames as string[];
   if (!Array.isArray(filenames)) {
@@ -101,21 +96,16 @@ export const downloadFile: RequestHandler = (req: Request, res: Response) => {
     return;
   }
 
-  // Determine the file's content type based on its extension
   const contentType = getContentType(fileName);
 
-  // Set the appropriate content type for the response
   res.setHeader("Content-Type", contentType);
   res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
 
-  // Create a read stream from the file path and pipe it to the response
   const fileStream = fs.createReadStream(filePath);
   fileStream.pipe(res);
 };
 
-
 export const listBucket: RequestHandler = (req: Request, res: Response) => {
-
   const currDir = "storage";
 
   printBucketName_hepler(currDir, (err, dir) => {
@@ -126,4 +116,3 @@ export const listBucket: RequestHandler = (req: Request, res: Response) => {
     }
   });
 };
-
