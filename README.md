@@ -19,7 +19,7 @@ http://localhost:9000/
 2> for fetching all files from bucket:- getfiles/:bucketname  
 3> for deleting single files at a time:- files/:bucketname/:filename  
 4> for deleting multiple files :- files     
-5> for downloading a file :- file/:bucketname/:filename
+5> for downloading a file :- file/:bucketname/:filename    
 6> for listing all buckets present in s3 :- /buckets
 
 
