@@ -10,7 +10,7 @@ import {
   removeMultipleFiles_helper,
   getContentType,
   printBucketName_hepler,
-} from "./fileHandler";
+} from "./helper";
 
 export const uploadFiles: RequestHandler = (req: Request, res: Response) => {
   const bucket = req.params.bucketname as string;
@@ -85,12 +85,10 @@ export const deleteMultipleFiles: RequestHandler = (
 };
 
 export const downloadFile: RequestHandler = (req: Request, res: Response) => {
-  // Implement logic to download a file from a bucket
   const bucket = req.params.bucketname as string;
   const fileName = req.params.filename as string;
   const filePath = path.join(`storage/${bucket}`, fileName);
 
-  // Check if the file exists
   if (!fs.existsSync(filePath)) {
     res.status(404).send("File not found.");
     return;

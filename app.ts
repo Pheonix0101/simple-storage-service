@@ -14,6 +14,7 @@ app.use("/", uploadRoutes);
 
 app.use("/api-docs", swaggerServe, swaggerSetup);
 
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

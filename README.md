@@ -12,7 +12,6 @@ Install Node.js version 20.11.0
 `npm start`
 
 
-
 # EndPoints followed with route name
 http://localhost:9000/
 
