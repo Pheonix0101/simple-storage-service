@@ -15,7 +15,7 @@ Install Node.js version 20.11.0
 # EndPoints followed with route name
 http://localhost:9000/
 
-1> for Adduploading files to the bucket:- upload/:bucketname  
+1> for uploading files to the bucket:- upload/:bucketname  
 2> for fetching all files from bucket:- getfiles/:bucketname  
 3> for deleting single files at a time:- files/:bucketname/:filename  
 4> for deleting multiple files :- files     
